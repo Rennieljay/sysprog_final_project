@@ -13,10 +13,10 @@ from PyQt4 import QtSql, QtGui, QtCore #import all necessary modules
 #set the database connection
 def createConnection():
 	db = QtSql.QSqlDatabase.addDatabase('QMYSQL')
-	db.setHostName() #enter host name here enclosed in single quotes
-	db.setDatabaseName() #enter the name of the database enclosed in single quotes
-	db.setUserName() #enter the username for the exclusive account you created in Part 1 enclosed in single quotes
-	db.setPassword() #enter password for the exclusive account enclosed in single quotes
+	db.setHostName('localhost') #enter host name here enclosed in single quotes
+	db.setDatabaseName('db_student_info') #enter the name of the database enclosed in single quotes
+	db.setUserName('root') #enter the username for the exclusive account you created in Part 1 enclosed in single quotes 
+	db.setPassword('') #enter password for the exclusive account enclosed in single quotes
 	db.open()
 	print (db.lastError().text())
 	return True
@@ -30,14 +30,18 @@ class MyCrud(QtGui.QMainWindow):
 		self.ui.setupUi(self)		
 		self.model=QtSql.QSqlQueryModel(self)		
 		
-		self.model.setQuery("select * ") #complete this query. select all from the tbl_students table
+		self.model.setQuery("select * from tbl_student_info") #complete this query. select all from the tbl_students table
 		self.record=self.model.record(0)
 		self.ui.txtId.setText(str(self.record.value("student_id")))
 		self.ui.txtFirstName.setText(self.record.value("fname"))
 		self.ui.txtLastName.setText(self.record.value("lname"))
+		self.ui.txtCourse.setText(self.record.value("course"))
+		self.ui.txtYear.setText(str(self.record.value("year")))
+		self.ui.txtSection.setText(self.record.value("section"))
+		
 		
 		self.model = QtSql.QSqlTableModel(self)
-		self.model.setTable("tbl_students")	
+		self.model.setTable("tbl_student_info")	
 		self.model.setEditStrategy(QtSql.QSqlTableModel.OnManualSubmit)
 		self.model.select()
 		
@@ -66,6 +70,9 @@ class MyCrud(QtGui.QMainWindow):
 		self.ui.txtId.setEnabled(True)
 		self.ui.txtFirstName.setEnabled(True)
 		self.ui.txtLastName.setEnabled(True)
+		self.ui.txtCourse.setEnabled(True)
+		self.ui.txtYear.setEnabled(True)
+		self.ui.txtSection.setEnabled(True)
 
 	def dispFirst(self):
 		MyCrud.recno=0
@@ -73,15 +80,20 @@ class MyCrud(QtGui.QMainWindow):
 		self.ui.txtId.setText(str(self.record.value("student_id")))
 		self.ui.txtFirstName.setText(self.record.value("fname"))
 		self.ui.txtLastName.setText(self.record.value("lname"))
+		self.ui.txtCourse.setText(self.record.value("course"))
+		self.ui.txtYear.setText(str(self.record.value("year")))
+		self.ui.txtSection.setText(self.record.value("section"))
 							
 	def dispPrevious(self):
 		MyCrud.recno-=1
 		if MyCrud.recno < 0:
 			MyCrud.recno=self.model.rowCount()-1
-		self.record=self.model.record(MyCrud.recno)
 		self.ui.txtId.setText(str(self.record.value("student_id")))
 		self.ui.txtFirstName.setText(self.record.value("fname"))
 		self.ui.txtLastName.setText(self.record.value("lname"))
+		self.ui.txtCourse.setText(self.record.value("course"))
+		self.ui.txtYear.setText(str(self.record.value("year")))
+		self.ui.txtSection.setText(self.record.value("section"))
 
 	def dispLast(self):
 		MyCrud.recno=self.model.rowCount()-1
@@ -89,6 +101,9 @@ class MyCrud(QtGui.QMainWindow):
 		self.ui.txtId.setText(str(self.record.value("student_id")))
 		self.ui.txtFirstName.setText(self.record.value("fname"))
 		self.ui.txtLastName.setText(self.record.value("lname"))
+		self.ui.txtCourse.setText(self.record.value("course"))
+		self.ui.txtYear.setText(str(self.record.value("year")))
+		self.ui.txtSection.setText(self.record.value("section"))
 			
 	def dispNext(self):
 		MyCrud.recno+=1
@@ -98,21 +113,36 @@ class MyCrud(QtGui.QMainWindow):
 		self.ui.txtId.setText(str(self.record.value("student_id")))
 		self.ui.txtFirstName.setText(self.record.value("fname"))
 		self.ui.txtLastName.setText(self.record.value("lname"))
-		
+		self.ui.txtCourse.setText(self.record.value("course"))
+		self.ui.txtYear.setText(str(self.record.value("year")))
+		self.ui.txtSection.setText(self.record.value("section"))
 	def AddRecord(self):
 		studentId = self.ui.txtId.text()
 		studentFName = self.ui.txtFirstName.text()
 		studentLName = self.ui.txtLastName.text()
+		studentCourse = self.ui.txtCourse.text()
+		studentYear = self.ui.txtYear.text()
+		studentSection = self.ui.txtSection.text()
+		
 			
 		self.model.setData(self.model.index(0, 1), studentId)
 		self.model.setData(self.model.index(0, 2), studentFName)
 		self.model.setData(self.model.index(0, 3), studentLName)
+		self.model.setData(self.model.index(0, 4), course)
+		self.model.setData(self.model.index(0, 5), year)
+		self.model.setData(self.model.index(0, 6), section)
 										
 	def UpdateRecord(self):
 		self.model.submitAll()
 	
 	def EditRecords(self):
 		self.model.insertRows(0,1)
+		self.model.insertRows(0,2)
+		self.model.insertRows(0,3)
+		self.model.insertRows(0,4)
+		self.model.insertRows(0,5)
+		self.model.insertRows(0,6)
+		
 
 	#research for this delete function. Hint: http://pyqt.sourceforge.net/Docs/PyQt4/qtsql.html#inserting-updating-and-deleting-records
 	#def DeleteRecord(self):
@@ -130,7 +160,7 @@ class MyCrud(QtGui.QMainWindow):
 		#The QWidget widget is the base class of all user interface objects in PyQt4.
 		msgBox = QtGui.QWidget(self)
 		#Show a message box
-		res = QMessageBox.information(msgBox, "Message", "new record successfully added!")
+		res = QtGui.QMessageBox.information(msgBox, "Message", "new record successfully added!")
 		msgBox.show()
 
 	def AlertBoxUpdateRecord(self):       
@@ -151,7 +181,7 @@ class FormSearch(QtGui.QDialog):
 		self.ui = Ui_Dialog()
 		self.ui.setupUi(self)	
 		self.model = QtSql.QSqlTableModel(self)		
-		self.model.setTable("tbl_students")		
+		self.model.setTable("tbl_student_info")		
 		self.model.setEditStrategy(QtSql.QSqlTableModel.OnManualSubmit)
 		self.model.removeColumn(0) #this code removes the tbl_id field from showing
 		self.model.select()
@@ -160,6 +190,9 @@ class FormSearch(QtGui.QDialog):
 		self.model.setHeaderData(0, QtCore.Qt.Horizontal, "ID NUMBER")
 		self.model.setHeaderData(1, QtCore.Qt.Horizontal, "FIRST NAME")
 		self.model.setHeaderData(2, QtCore.Qt.Horizontal, "LAST NAME")
+		self.model.setHeaderData(3, QtCore.Qt.Horizontal, "COURSE")
+		self.model.setHeaderData(4, QtCore.Qt.Horizontal, "YEAR")
+		self.model.setHeaderData(5, QtCore.Qt.Horizontal, "SECTION")
 		
 		#set the table view "tblSearch" as model
 		self.ui.tblSearch.setModel(self.model)		
